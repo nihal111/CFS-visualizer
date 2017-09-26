@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Completely Fair Scheduler Visualization</title>
+    <style>
+        header h1 {
+            margin: 2px;
+            font-size: 2em;
+        }
+        h3 {
+            text-align: center;
+        }
+        .control_row {
+            margin-bottom: 10px;
+        }
+        #svg {
+            border: 1px solid;
+        }
+        .node circle {
+          fill: #fff;
+          stroke: steelblue;
+          stroke-width: 5.5px;
+        }
+        .node text {
+          font: 10px sans-serif;
+        }
+        .link {
+          fill: none;
+          stroke: #ccc;
+          stroke-width: 1.5px;
+        }
+                
+    </style>
+</head>
+<body>
+    <h3>Completely Fair Scheduler</h3>
+
+    <label>Tasks File: </label>
+    <input id="fileInput" type="file" size="5"/><br/>
+    <textarea id="rawTasksFile" cols="80" rows="10">3 11
+A 1 3
+B 2 4
+C 2 3</textarea>
+
+    <br/></br/>
+
+    <div class="control_row">
+        <label>Timeline Datastructure: </label>
+        <select id="treeType">
+            <option value="bst">Binary Search Tree (BST)
+            <option value="rbt" selected>Red-Black Tree (RBT)
+            <option value="heaptree">Min Heap (Tree)
+            <option value="heaparray">Min Heap (Array)
+        </select>
+    </div>
+
+    <div>
+        <input name="stats" id="summary" type=radio checked><label>Summary</label>
+        <input name="stats" id="csv" type=radio><label>CSV</label>
+        <input name="stats" id="report" type=radio><label>Report</label>
+        <input name="stats" id="detailed" type=radio><label>Detailed Report</label>
+    </div>
+
+    <div>
+        <input id="runButton" type="submit" size="5" value="Run Scheduler"/></br></br>
+    </div>
+
+    <textarea id="schedulerResults" cols="80" rows="20"></textarea>
+    <div class="control_row">
+        Insert One Number:
+        <input id="addOneNumber" type=text size=6>
+        <input id="addOneButton" type=button value="Insert">
+    </div>
+    <div class="control_row">
+        Insert <input id="addXNumber" type=text size=5 value=10> Random Numbers
+        <input id="addXMin" type=text size=5 value=1> - 
+        <input id="addXMax" type=text size=5 value=100>
+        <input id="addXButton" type=button value="Insert">
+    </div>
+    <div id="viz">
+        <svg id="svg"></svg>
+    </div>
+
+    <script src="binarytree.js"></script>
+    <script src="bst.js"></script>
+    <script src="rbt.js"></script>
+    <script src="tasks.js"></script>
+    <script src="scheduler.js"></script>
+    <script src="web/scheduler.js"></script>
+
+    <script type="text/javascript" src="d3.v3.min.js"></script>
+    <script type="text/javascript" src="web/trees.js"></script>
+</body>
+</html>
