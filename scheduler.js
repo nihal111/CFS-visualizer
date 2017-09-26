@@ -44,9 +44,9 @@ function runScheduler(tasks, timeline, callback) {
     for(var curTime=0; curTime < tasks.total_time; curTime+=1) {
         // Periodic debug output
         console.log(curTime);
-        if (curTime == 4) {
+        if (curTime == 10) {
             console.log(timeline.min().val);
-            update(timeline);
+            update(curTree);
         }
 
         if (curTime % 1000 === 0) {
@@ -69,6 +69,7 @@ function runScheduler(tasks, timeline, callback) {
             new_task.truntime = 0;
             new_task.actual_start_time = curTime;
             timeline.insert(new_task);
+            curTree.insert(new_task.vruntime);
         }
 
         // If there is a task running and its vruntime exceeds
@@ -77,6 +78,7 @@ function runScheduler(tasks, timeline, callback) {
         // added back to the timeline.
         if (running_task && (running_task.vruntime > min_vruntime)) {
             timeline.insert(running_task);
+            curTree.insert(running_task.vruntime);
             running_task = null;
         }
 
@@ -89,6 +91,7 @@ function runScheduler(tasks, timeline, callback) {
             var min_node = timeline.min();
             running_task = min_node.val;
             timeline.remove(min_node);
+            curTree.remove(curTree.min());
             if (timeline.size() > 0) {
                 min_vruntime = timeline.min().val.vruntime
             }
