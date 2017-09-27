@@ -19,9 +19,11 @@ function roundTo(n, digits) {
     return +(test.toFixed(digits));
 }
 
+var DELAY = 1000;
 var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, curTime;
 
 function initialiseScheduler(tasks) {
+
     // queue of tasks sorted in start_time order
     time_queue = tasks.task_queue;
     // index into time_queue of the next nearest task to start
@@ -44,61 +46,77 @@ function initialiseScheduler(tasks) {
     binarytree.RESET_STATS();
 }
 
+function addFromTaskQueue(tasks, timeline, callback) {
+    // Check tasks at the beginning of the task queue. Add any to
+    // the timeline structure when the start_time for those tasks
+    // has arrived.
+    while (time_queue_idx < time_queue.length &&
+           (curTime >= time_queue[time_queue_idx].start_time)) {
+        var new_task = time_queue[time_queue_idx++];
+        // new tasks get their vruntime set to the current
+        // min_vruntime
+        new_task.vruntime = min_vruntime;
+        new_task.truntime = 0;
+        new_task.actual_start_time = curTime;
+        timeline.insert(new_task);
+        curTree.insert(new_task.vruntime);
+        console.log("Adding " + new_task.vruntime);
+        update(curTree);
+    }
+}
+
+function insertRunningTaskBack(tasks, timeline, callback) {
+    // If there is a task running and its vruntime exceeds
+    // min_vruntime then add it back to the timeline. Since
+    // vruntime is greater it won't change min_vruntime when it's
+    // added back to the timeline.
+    if (running_task && (running_task.vruntime > min_vruntime)) {
+        timeline.insert(running_task);
+        curTree.insert(running_task.vruntime);
+        console.log("Adding " + running_task.vruntime);
+        update(curTree);
+        running_task = null;
+    }
+}
+
+function findRunningTask(tasks, timeline, callback) {
+    // If there is no running task (which may happen right after
+    // the running_task is added back to the timeline above), find
+    // the task with the smallest vruntime on the timeline, remove
+    // it and set it as the running_task and determine the new
+    // min_vruntime.
+    if (!running_task && timeline.size() > 0) {
+        var min_node = timeline.min();
+        running_task = min_node.val;
+        timeline.remove(min_node);
+        curTree.remove(curTree.min());
+        console.log("Removing " + running_task.vruntime);
+        update(curTree);
+        if (timeline.size() > 0) {
+            min_vruntime = timeline.min().val.vruntime
+        }
+    }
+}
+
 function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
         console.log(curTime);
 
-        if (curTime % 1000 === 0) {
-            //console.error("curTime: " + curTime + ", size: " + timeline.size() + ", task index: " + time_queue_idx);
-        }
-    
+        setTimeout(function(){
+            addFromTaskQueue(tasks, timeline, callback);
+        }, DELAY/3);
+        setTimeout(function(){
+            insertRunningTaskBack(tasks, timeline, callback);
+        }, 2*DELAY/3);
+        setTimeout(function(){
+            findRunningTask(tasks, timeline, callback);
+        }, 3*DELAY/3);
+
+        
         // Results data for this time unit/tick
         var tresults = {running_task: null,
                         completed_task: null};
-
-        // Check tasks at the beginning of the task queue. Add any to
-        // the timeline structure when the start_time for those tasks
-        // has arrived.
-        while (time_queue_idx < time_queue.length &&
-               (curTime >= time_queue[time_queue_idx].start_time)) {
-            var new_task = time_queue[time_queue_idx++];
-            // new tasks get their vruntime set to the current
-            // min_vruntime
-            new_task.vruntime = min_vruntime;
-            new_task.truntime = 0;
-            new_task.actual_start_time = curTime;
-            timeline.insert(new_task);
-            curTree.insert(new_task.vruntime);
-            update(curTree);
-        }
-
-        // If there is a task running and its vruntime exceeds
-        // min_vruntime then add it back to the timeline. Since
-        // vruntime is greater it won't change min_vruntime when it's
-        // added back to the timeline.
-        if (running_task && (running_task.vruntime > min_vruntime)) {
-            timeline.insert(running_task);
-            curTree.insert(running_task.vruntime);
-            update(curTree);
-            running_task = null;
-        }
-
-        // If there is no running task (which may happen right after
-        // the running_task is added back to the timeline above), find
-        // the task with the smallest vruntime on the timeline, remove
-        // it and set it as the running_task and determine the new
-        // min_vruntime.
-        if (!running_task && timeline.size() > 0) {
-            var min_node = timeline.min();
-            running_task = min_node.val;
-            timeline.remove(min_node);
-            curTree.remove(curTree.min());
-            update(curTree);
-            if (timeline.size() > 0) {
-                min_vruntime = timeline.min().val.vruntime
-            }
-        }
 
         // Update the running_task (if any) by increasing the vruntime
         // and the truntime. If the running task has run for it's full
@@ -130,17 +148,18 @@ function nextIteration(tasks, timeline, callback) {
         }
 
         curTime++;
+
         return new Promise(resolve => {
           setTimeout(() => {
             resolve(nextIteration(tasks, timeline, callback));
-          }, 1000);
+          }, DELAY);
         });
     } else {
         return;
     }
 }
 
-function returnResults() {
+function returnResults(tasks, timeline, callback) {
     // Put any currently running task back in the timeline
     if (running_task) {
         timeline.insert(running_task);
@@ -158,7 +177,7 @@ async function runScheduler(tasks, timeline, callback) {
     initialiseScheduler(tasks);
     await nextIteration(tasks, timeline, callback);
     console.log("finished");
-    return returnResults();    
+    return returnResults(tasks, timeline, callback);    
 }
 
 function generateSummary(tasks, timeline, results) {
