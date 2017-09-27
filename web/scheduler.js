@@ -25,9 +25,9 @@ window.onload = function () {
     $("#runButton").addEventListener('click', function () {
         try {
             var rawTasksString = $("#rawTasksFile").value;
-            console.log(rawTasksString);
+            //console.log(rawTasksString);
             var tasksData = tasks.parseTasks(rawTasksString);
-            console.log(tasksData);
+            //console.log(tasksData);
         } catch (e) {
             console.error(e.stack);
             alert("Error parsing task data: " + e);
@@ -35,13 +35,13 @@ window.onload = function () {
         }
 
         // Run the CFS algorithm and generate a results report
-        var timeline = getTimelineByName($("#treeType").value);
+        var timeline = getTimelineByName("rbt");
         var results = scheduler.runScheduler(tasksData, timeline);
 
         var sR = $("#schedulerResults"),
             tT = $("#treeType"),
             mode = $('input[name="stats"]:checked').id;
-        console.log(results);
+        //console.log(results);
         if (mode === 'csv') {
             sR.innerHTML += "total_tasks,total_time,completed_tasks,elapsed_ms,read_ops,write_ops,total_ops,tasks/ms,tasks/op\n";
         } else if (mode !== 'summary') {

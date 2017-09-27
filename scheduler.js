@@ -19,33 +19,36 @@ function roundTo(n, digits) {
     return +(test.toFixed(digits));
 }
 
-// runScheduler: Run scheduler algorithm
-function runScheduler(tasks, timeline, callback) {
+var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, curTime;
+
+function initialiseScheduler(tasks) {
     // queue of tasks sorted in start_time order
-    var time_queue = tasks.task_queue;
+    time_queue = tasks.task_queue;
     // index into time_queue of the next nearest task to start
-    var time_queue_idx = 0;
+    time_queue_idx = 0;
 
     // min_vruntime is set to the smallest vruntime of tasks on the
     // timeline
-    var min_vruntime = 0;
+    min_vruntime = 0;
 
     // current running task or null if no tasks are running.
-    var running_task = null;
+    running_task = null;
+
+    // current time in millis
+    curTime = 0;
 
 
     // Initialize statistics gathering
-    var results = {time_data: []};
-    var start_ms = new Date().getTime();
+    results = {time_data: []};
+    start_ms = new Date().getTime();
     binarytree.RESET_STATS();
+}
 
-    // Loop from time/tick 0 through the total time/ticks specified
-    // curTime is time in millis
-    for(var curTime=0; curTime < tasks.total_time; curTime+=1) {
+function nextIteration(tasks, timeline, callback) {
+    if (curTime < tasks.total_time) {
         // Periodic debug output
         console.log(curTime);
         if (curTime == 10) {
-            console.log(timeline.min().val);
             update(curTree);
         }
 
@@ -119,14 +122,19 @@ function runScheduler(tasks, timeline, callback) {
 
         results.time_data[curTime] = tresults;
         if (callback) {
+            console.log("lol");
             callback(curTime, results);
         }
 
         if (task_done) {
             running_task = null;
         }
-    }
 
+        curTime++;
+    }
+}
+
+function returnResults() {
     // Put any currently running task back in the timeline
     if (running_task) {
         timeline.insert(running_task);
@@ -137,6 +145,16 @@ function runScheduler(tasks, timeline, callback) {
     results.elapsed_ms = (new Date().getTime())-start_ms;
 
     return results;
+}
+
+// runScheduler: Run scheduler algorithm
+function runScheduler(tasks, timeline, callback) {
+    initialiseScheduler(tasks);
+    for (var i = 0; i< tasks.total_time; i++) {
+        nextIteration(tasks, timeline, callback);
+    }
+
+    return returnResults();    
 }
 
 function generateSummary(tasks, timeline, results) {
@@ -340,7 +358,7 @@ var nilIdx = 0,
                 c.push(n.right);
             }
         }
-        console.log(n.val, c);
+        //console.log(n.val, c);
         return c;
     })
     .sort(function(a, b) {
@@ -473,7 +491,7 @@ function update(sourceTree) {
 
   // Update the stats values
   var reads = 0, writes = 0;
-  console.log(curTree.STATS);
+  //console.log(curTree.STATS);
   for (var r in curTree.STATS.read) {
     reads += curTree.STATS.read[r];
   }

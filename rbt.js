@@ -231,7 +231,6 @@ function redblackRemoveFixup(tree, node) {
 // CLRS 13.4
 // Different enough from treeRemove to deserve it's own function
 function redblackRemove(tree, node) {
-    console.log(tree);
     var z = node,
         y = z,
         x,
