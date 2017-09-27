@@ -19,7 +19,7 @@ function roundTo(n, digits) {
     return +(test.toFixed(digits));
 }
 
-var DELAY = 1000;
+var DELAY = 8000;
 var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, curTime;
 
 function initialiseScheduler(tasks) {
