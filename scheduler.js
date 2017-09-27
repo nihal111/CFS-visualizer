@@ -1,8 +1,8 @@
 // Node vs browser behavior
 if (typeof module !== 'undefined') {
-    var binarytree = require('./binarytree'),
-        bst = require('./bst.js'),
-        rbt = require('./rbt.js')
+    var binarytree = require('./trees/binarytree'),
+        bst = require('./trees/bst.js'),
+        rbt = require('./trees/rbt.js')
 } else {
     var scheduler = {},
         exports = scheduler;
