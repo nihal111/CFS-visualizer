@@ -416,7 +416,7 @@ function update(sourceTree) {
   // Enter any new nodes at the parent's previous position.
   var nodeEnter = node.enter().append("g")
       .attr("class", "node")
-      .attr("transform", function(d) { return "translate(" + d.p.x + "," + d.p.y + ")"; });
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
   nodeEnter.append("circle")
       .attr("r", 1e-6)
@@ -452,7 +452,7 @@ function update(sourceTree) {
   // Transition exiting nodes to the parent's new position.
   var nodeExit = node.exit().transition()
       .duration(duration)
-      .attr("transform", function(d) { return "translate(" + d.p.x + "," + d.p.y + ")"; })
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
       .remove();
 
   nodeExit.select("circle")
