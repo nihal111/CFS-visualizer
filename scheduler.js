@@ -48,9 +48,9 @@ function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
         console.log(curTime);
-        if (curTime == 10) {
+        // if (curTime == 10) {
             update(curTree);
-        }
+        // }
 
         if (curTime % 1000 === 0) {
             //console.error("curTime: " + curTime + ", size: " + timeline.size() + ", task index: " + time_queue_idx);
@@ -122,7 +122,6 @@ function nextIteration(tasks, timeline, callback) {
 
         results.time_data[curTime] = tresults;
         if (callback) {
-            console.log("lol");
             callback(curTime, results);
         }
 
@@ -131,6 +130,13 @@ function nextIteration(tasks, timeline, callback) {
         }
 
         curTime++;
+        return new Promise(resolve => {
+          setTimeout(() => {
+            resolve(nextIteration(tasks, timeline, callback));
+          }, 1000);
+        });
+    } else {
+        return;
     }
 }
 
@@ -148,12 +154,10 @@ function returnResults() {
 }
 
 // runScheduler: Run scheduler algorithm
-function runScheduler(tasks, timeline, callback) {
+async function runScheduler(tasks, timeline, callback) {
     initialiseScheduler(tasks);
-    for (var i = 0; i< tasks.total_time; i++) {
-        nextIteration(tasks, timeline, callback);
-    }
-
+    await nextIteration(tasks, timeline, callback);
+    console.log("finished");
     return returnResults();    
 }
 

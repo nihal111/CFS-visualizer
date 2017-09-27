@@ -22,7 +22,7 @@ window.onload = function () {
         }
     });
 
-    $("#runButton").addEventListener('click', function () {
+    $("#runButton").addEventListener('click', async function () {
         try {
             var rawTasksString = $("#rawTasksFile").value;
             //console.log(rawTasksString);
@@ -36,7 +36,7 @@ window.onload = function () {
 
         // Run the CFS algorithm and generate a results report
         var timeline = getTimelineByName("rbt");
-        var results = scheduler.runScheduler(tasksData, timeline);
+        var results = await scheduler.runScheduler(tasksData, timeline);
 
         var sR = $("#schedulerResults"),
             tT = $("#treeType"),
@@ -47,6 +47,7 @@ window.onload = function () {
         } else if (mode !== 'summary') {
             sR.innerHTML += "Running scheduler with: " + timeline.name + "\n";
         }
+
 
         sR.innerHTML += scheduler.generateReport(tasksData, timeline, results, mode);
         sR.innerHTML += "\n";
