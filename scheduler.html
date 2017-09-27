@@ -38,7 +38,7 @@
 
     <label>Tasks File: </label>
     <input id="fileInput" type="file" size="5"/><br/>
-    <textarea id="rawTasksFile" cols="80" rows="10">3 11
+    <textarea id="rawTasksFile" cols="80" rows="5">3 11
 A 1 3
 B 2 4
 C 2 3</textarea>
@@ -56,18 +56,8 @@ C 2 3</textarea>
         <input id="runButton" type="submit" size="5" value="Run Scheduler"/></br></br>
     </div>
 
-    <textarea id="schedulerResults" cols="80" rows="20"></textarea>
-    <div class="control_row">
-        Insert One Number:
-        <input id="addOneNumber" type=text size=6>
-        <input id="addOneButton" type=button value="Insert">
-    </div>
-    <div class="control_row">
-        Insert <input id="addXNumber" type=text size=5 value=10> Random Numbers
-        <input id="addXMin" type=text size=5 value=1> - 
-        <input id="addXMax" type=text size=5 value=100>
-        <input id="addXButton" type=button value="Insert">
-    </div>
+    <textarea id="schedulerResults" cols="80" rows="2"></textarea>
+    <br/><br/>
     <div id="viz">
         <svg id="svg"></svg>
     </div>

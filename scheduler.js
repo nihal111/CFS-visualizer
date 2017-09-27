@@ -48,9 +48,6 @@ function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
         console.log(curTime);
-        // if (curTime == 10) {
-            update(curTree);
-        // }
 
         if (curTime % 1000 === 0) {
             //console.error("curTime: " + curTime + ", size: " + timeline.size() + ", task index: " + time_queue_idx);
@@ -73,6 +70,7 @@ function nextIteration(tasks, timeline, callback) {
             new_task.actual_start_time = curTime;
             timeline.insert(new_task);
             curTree.insert(new_task.vruntime);
+            update(curTree);
         }
 
         // If there is a task running and its vruntime exceeds
@@ -82,6 +80,7 @@ function nextIteration(tasks, timeline, callback) {
         if (running_task && (running_task.vruntime > min_vruntime)) {
             timeline.insert(running_task);
             curTree.insert(running_task.vruntime);
+            update(curTree);
             running_task = null;
         }
 
@@ -95,6 +94,7 @@ function nextIteration(tasks, timeline, callback) {
             running_task = min_node.val;
             timeline.remove(min_node);
             curTree.remove(curTree.min());
+            update(curTree);
             if (timeline.size() > 0) {
                 min_vruntime = timeline.min().val.vruntime
             }
@@ -507,34 +507,6 @@ function update(sourceTree) {
 
   // Reset the stats to be the internal one for this tree
   RESET_STATS(curTree.STATS);
-}
-
-// Attach button/input handlers
-
-// $('#treeType').onclick = function() {
-//     console.log(this.value);
-//     curTree = trees[this.value];
-//     update(curTree);
-// }
-
-$('#addOneButton').onclick = function() {
-    var num = parseInt($('#addOneNumber').value, 10);
-    RESET_STATS(curTree.STATS);
-    curTree.insert(num);
-    update(curTree);
-}
-
-$('#addXButton').onclick = function() {
-    var cnt = parseInt($('#addXNumber').value, 10),
-        min = parseInt($('#addXMin').value, 10),
-        max = parseInt($('#addXMax').value, 10);
-    for (var i=0; i < cnt; i++) {
-        var num = parseInt(Math.random()*(max-min)+min, 10);
-        RESET_STATS(curTree.STATS);
-        curTree.insert(num);
-    }
-    update(curTree);
-    console.log(curTree);
 }
 
 // Add a STATS structure to each tree
