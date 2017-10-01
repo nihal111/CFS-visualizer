@@ -98,6 +98,10 @@ function findRunningTask(tasks, timeline, callback) {
     }
 }
 
+function setDelay(value) {
+    DELAY = value;
+}
+
 function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
