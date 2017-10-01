@@ -22,6 +22,13 @@ function roundTo(n, digits) {
 var DELAY = 8000;
 var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, curTime;
 
+// Display element variables
+var curTimeDisplay
+
+function initialiseDisplay() {
+    curTimeDisplay = document.getElementById("curTimeDisplay");
+}
+
 function initialiseScheduler(tasks) {
 
     // queue of tasks sorted in start_time order
@@ -105,6 +112,7 @@ function setDelay(value) {
 function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
+        updateCurTimeDisplay(curTime);
         console.log(curTime);
 
         setTimeout(function(){
@@ -179,9 +187,14 @@ function returnResults(tasks, timeline, callback) {
 // runScheduler: Run scheduler algorithm
 async function runScheduler(tasks, timeline, callback) {
     initialiseScheduler(tasks);
+    initialiseDisplay();
     await nextIteration(tasks, timeline, callback);
     console.log("finished");
     return returnResults(tasks, timeline, callback);    
+}
+
+function updateCurTimeDisplay(curTime) {
+    curTimeDisplay.innerText = curTime;
 }
 
 function generateSummary(tasks, timeline, results) {
