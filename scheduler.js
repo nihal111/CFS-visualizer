@@ -27,6 +27,7 @@ var curTimeDisplay
 
 function initialiseDisplay() {
     curTimeDisplay = document.getElementById("curTimeDisplay");
+    messageDisplay = document.getElementById("messageDisplay");
 }
 
 function initialiseScheduler(tasks) {
@@ -68,6 +69,7 @@ function addFromTaskQueue(tasks, timeline, callback) {
         timeline.insert(new_task);
         curTree.insert(new_task.vruntime);
         console.log("Adding " + new_task.vruntime);
+        updateMessageDisplay("Adding " + new_task.vruntime);
         update(curTree);
     }
 }
@@ -80,7 +82,8 @@ function insertRunningTaskBack(tasks, timeline, callback) {
     if (running_task && (running_task.vruntime > min_vruntime)) {
         timeline.insert(running_task);
         curTree.insert(running_task.vruntime);
-        console.log("Adding " + running_task.vruntime);
+        console.log("Inserting Back " + running_task.vruntime);
+        updateMessageDisplay("Inserting Back " + running_task.vruntime);
         update(curTree);
         running_task = null;
     }
@@ -98,6 +101,7 @@ function findRunningTask(tasks, timeline, callback) {
         timeline.remove(min_node);
         curTree.remove(curTree.min());
         console.log("Removing " + running_task.vruntime);
+        updateMessageDisplay("Removing " + running_task.vruntime);
         update(curTree);
         if (timeline.size() > 0) {
             min_vruntime = timeline.min().val.vruntime
@@ -113,7 +117,6 @@ function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
         updateCurTimeDisplay(curTime);
-        console.log(curTime);
 
         setTimeout(function(){
             addFromTaskQueue(tasks, timeline, callback);
@@ -195,6 +198,10 @@ async function runScheduler(tasks, timeline, callback) {
 
 function updateCurTimeDisplay(curTime) {
     curTimeDisplay.innerText = curTime;
+}
+
+function updateMessageDisplay(message) {
+    messageDisplay.innerText = message;
 }
 
 function generateSummary(tasks, timeline, results) {
