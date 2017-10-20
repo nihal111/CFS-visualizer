@@ -27,6 +27,7 @@ var curTimeDisplay
 
 function initialiseDisplay() {
     curTimeDisplay = document.getElementById("curTimeDisplay");
+    curTaskDisplay = document.getElementById("curTaskDisplay");
     messageDisplay = document.getElementById("messageDisplay");
 }
 
@@ -82,10 +83,11 @@ function insertRunningTaskBack(tasks, timeline, callback) {
     if (running_task && (running_task.vruntime > min_vruntime)) {
         timeline.insert(running_task);
         curTree.insert(running_task.vruntime);
-        console.log("Inserting Back " + running_task.vruntime);
-        updateMessageDisplay("Inserting Back " + running_task.vruntime);
+        console.log("Inserting " + running_task.vruntime);
+        updateMessageDisplay("Inserting " + running_task.vruntime);
         update(curTree);
         running_task = null;
+        updateCurTaskDisplay("-");
     }
 }
 
@@ -102,6 +104,7 @@ function findRunningTask(tasks, timeline, callback) {
         curTree.remove(curTree.min());
         console.log("Removing " + running_task.vruntime);
         updateMessageDisplay("Removing " + running_task.vruntime);
+        updateCurTaskDisplay(running_task.vruntime);
         update(curTree);
         if (timeline.size() > 0) {
             min_vruntime = timeline.min().val.vruntime
@@ -198,6 +201,10 @@ async function runScheduler(tasks, timeline, callback) {
 
 function updateCurTimeDisplay(curTime) {
     curTimeDisplay.innerText = curTime;
+}
+
+function updateCurTaskDisplay(curTask) {
+    curTaskDisplay.innerText = curTask;
 }
 
 function updateMessageDisplay(message) {
