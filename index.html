@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<!--
+	Photon by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Photon by HTML5 UP</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+	</head>
+	<body>
+
+		<!-- Header -->
+			<section id="header">
+				<div class="inner">
+					<span class="icon major fa-list-alt"></span>
+					<h1>This is a visualisation of the<br/>
+					<strong>Completely Fair Scheduler</strong><br/><br/>
+					<p style="font-size: 50%; line-height: 1.2em; width: 60%; float:center; margin: auto;">The Completely Fair Scheduler is a process scheduler that handles CPU resource allocation for executing processes	and aims to maximize overall CPU utilization while also maximizing interactive performance.</p>
+					<ul class="actions">
+						<li><a href="#one" class="button scrolly">Simulate</a></li>
+					</ul>
+				</div>
+			</section>
+
+		<!-- One -->
+			<section id="one" class="main style1">
+				<div class="container">
+					<header class="major special">
+						<h2>Define Tasks</h2>
+					</header>
+					<section>
+						Tasks File: <input id="fileInput" type="file" size="5"/><br/>
+						<textarea id="rawTasksFile" cols="80" rows="5">3 11
+A 1 3
+B 2 4
+C 2 3</textarea>
+					</section>
+
+				    <br/><br/>
+				    <center>
+					<div>
+				        <input name="stats" id="summary" type=radio checked><label>Summary</label>
+				        <input name="stats" id="csv" type=radio><label>CSV</label>
+				        <input name="stats" id="report" type=radio><label>Report</label>
+				        <input name="stats" id="detailed" type=radio><label>Detailed Report</label>
+				    </div>
+
+				    <div>
+				        <input id="runButton" type="submit" href="#two" class="button scrolly" size="5" value="Run Scheduler"/><br/><br/>
+				    </div>
+				    </center>
+
+				</div>
+			</section>
+
+		<!-- Two -->
+			<section id="two" class="main style2">
+				<div class="container">
+					<div class="row 150%">
+						<div class="10u 12u$(medium)">
+							<div id="viz">
+						        <svg id="svg"></svg>
+						    </div>
+						</div>
+						<div class="2u 12u$(medium)">
+        					<span style="display:table; margin:0 auto; font-size: 100%;">Current CPU Time</span><br/>
+							<span id="curTimeDisplay" style="display:table; margin:0 auto; font-size: 400%;">0</span>
+        					<br/><hr style="border: 1px solid #ccc;"/><br/>
+					        <span style="display:table; margin:0 auto; font-size: 100%;">Current Task</span><br/>
+					        <span id="curTaskDisplay" style="display:table; margin:0 auto; font-size: 500%;">-</span>
+					        <br/><hr style="border: 1px solid #ccc;"/><br/>
+					        <span id="messageDisplay" style="display:table; margin:0 auto; font-size: 150%;"></span>
+						</div>
+					</div>
+					
+				</div>
+			</section>
+
+		<!-- Three -->
+			<section id="three" class="main style1 special">
+				<div class="container">
+					<header class="major">
+						<h2>Scheduler Results</h2>
+					</header>
+					<textarea id="schedulerResults" cols="80" rows="2"></textarea>
+				</div>
+			</section>		
+
+		<!-- Footer -->
+			<section id="footer">
+				<ul class="copyright">
+					<li>&copy; Ferozepurvale</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+				</ul>
+			</section>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/jquery.scrolly.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+			<script type="text/javascript" src="lib/d3.v3.min.js"></script>
+		    <script src="trees/binarytree.js"></script>
+		    <script src="trees/bst.js"></script>
+		    <script src="trees/rbt.js"></script>
+		    <script src="tasks.js"></script>
+		    <script src="scheduler.js"></script>
+		    <script src="web/scheduler.js"></script>
+
+	</body>
+</html>
