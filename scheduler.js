@@ -21,9 +21,17 @@ function roundTo(n, digits) {
 
 var DELAY = 8000;
 var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, curTime;
+var cur_duration = 0;
+var total_weight = 0;
+
+// Min time process can run before preemption
+var min_granularity = 0.75;
+
+// Period in which all tasks are scheduled at least once
+var latency = 6;
 
 // Display element variables
-var curTimeDisplay
+var curTimeDisplay;
 
 function initialiseDisplay() {
     curTimeDisplay = document.getElementById("curTimeDisplay");
@@ -116,21 +124,44 @@ function setDelay(value) {
     DELAY = value;
 }
 
+function updateWeights(tasks) {
+    for (var i=0 ; i<tasks.length ; i++) {
+        tasks[i].weight = Math.pow(1.25, -1*tasks[i].nice) * 1024;
+        total_weight += tasks[i].weight;
+    }
+}
+
+function updateSlices(tasks, period) {
+    for (var i=0 ; i<tasks.length ; i++) {
+        tasks[i].slice = roundTo((tasks[i].weight * period) / total_weight, 0);
+        console.log("period = " + period);
+        console.log("total_weight = " + total_weight);
+        console.log(tasks[i].slice);
+    }
+}
+
 function nextIteration(tasks, timeline, callback) {
     if (curTime < tasks.total_time) {
         // Periodic debug output
         updateCurTimeDisplay(curTime);
+        console.log("current duration = " + cur_duration);
 
-        setTimeout(function(){
-            addFromTaskQueue(tasks, timeline, callback);
-        }, DELAY/3);
-        setTimeout(function(){
-            insertRunningTaskBack(tasks, timeline, callback);
-        }, 2*DELAY/3);
-        setTimeout(function(){
-            findRunningTask(tasks, timeline, callback);
-        }, 3*DELAY/3);
+        if (!running_task) {
+            setTimeout(function(){
+                addFromTaskQueue(tasks, timeline, callback);
+            }, DELAY/3);
+            setTimeout(function(){
+                insertRunningTaskBack(tasks, timeline, callback);
+            }, 2*DELAY/3);
+            setTimeout(function(){
+                findRunningTask(tasks, timeline, callback);
+            }, 3*DELAY/3);
 
+            cur_duration = 0;
+            updateWeights(time_queue);
+            console.log(tasks);
+            updateSlices(time_queue, Math.max(latency, min_granularity*tasks.num_of_tasks));
+        }
         
         // Results data for this time unit/tick
         var tresults = {running_task: null,
@@ -152,6 +183,10 @@ function nextIteration(tasks, timeline, callback) {
                 task_done = true; // Set running_task to null later
                 //console.log("Completed task:", running_task.id);
             }
+            console.log(running_task);
+            if (cur_duration >= running_task.slice) {
+                task_done = true;
+            }
         }
 
         tresults.num_tasks = timeline.size() + (running_task ? 1 : 0);
@@ -166,6 +201,7 @@ function nextIteration(tasks, timeline, callback) {
         }
 
         curTime++;
+        cur_duration++;
 
         return new Promise(resolve => {
           setTimeout(() => {
