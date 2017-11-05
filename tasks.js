@@ -22,7 +22,8 @@ function parseTasks (data) {
         // Create a new task object and add it to the queue
         var task = {id         :          task_data[0],
                     start_time : parseInt(task_data[1], 10),
-                    duration   : parseInt(task_data[2], 10)};
+                    duration   : parseInt(task_data[2], 10),
+                    nice       : parseInt(task_data[3], 10)};
         queue.push(task);
     }
 

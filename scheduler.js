@@ -20,10 +20,12 @@ function roundTo(n, digits) {
 }
 
 var DELAY = 8000;
-var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, curTime;
+var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, 
+curTime, total_weight, min_granularity, latency;
+
 
 // Display element variables
-var curTimeDisplay
+var curTimeDisplay;
 
 function initialiseDisplay() {
     curTimeDisplay = document.getElementById("curTimeDisplay");
@@ -48,6 +50,20 @@ function initialiseScheduler(tasks) {
     // current time in millis
     curTime = 0;
 
+    total_weight = 0;
+
+    // Total number of tasks that are currently in timeline + running task
+    num_of_tasks_until_curTime = 0;
+
+    // Min time process can run before preemption
+    min_granularity = 0.75*1000;
+
+    // Period in which all tasks are scheduled at least once
+    latency = 6*1000;
+
+    // Computes weight from nice value of all tasks
+    updateWeights(time_queue);
+
 
     // Initialize statistics gathering
     results = {time_data: []};
@@ -61,6 +77,7 @@ function addFromTaskQueue(tasks, timeline, callback) {
     // has arrived.
     while (time_queue_idx < time_queue.length &&
            (curTime >= time_queue[time_queue_idx].start_time)) {
+        num_of_tasks_until_curTime++;
         var new_task = time_queue[time_queue_idx++];
         // new tasks get their vruntime set to the current
         // min_vruntime
@@ -69,10 +86,14 @@ function addFromTaskQueue(tasks, timeline, callback) {
         new_task.actual_start_time = curTime;
         timeline.insert(new_task);
         curTree.insert(new_task.vruntime);
-        console.log("Adding " + new_task.vruntime);
-        updateMessageDisplay("Adding " + new_task.vruntime);
+        console.log("Adding " + new_task.id + " with vruntime " + new_task.vruntime);
+        updateMessageDisplay("Adding " + new_task.id);
         update(curTree);
+
+        updateSummationWeights(new_task.weight);
     }
+
+    updateSlices(time_queue, Math.max(latency, min_granularity*num_of_tasks_until_curTime));
 }
 
 function insertRunningTaskBack(tasks, timeline, callback) {
@@ -80,11 +101,11 @@ function insertRunningTaskBack(tasks, timeline, callback) {
     // min_vruntime then add it back to the timeline. Since
     // vruntime is greater it won't change min_vruntime when it's
     // added back to the timeline.
-    if (running_task && (running_task.vruntime > min_vruntime)) {
+    if (running_task && (running_task.vruntime > min_vruntime) && (running_task.this_slice > running_task.slice)) {
         timeline.insert(running_task);
         curTree.insert(running_task.vruntime);
-        console.log("Inserting " + running_task.vruntime);
-        updateMessageDisplay("Inserting " + running_task.vruntime);
+        console.log("Inserting " + running_task.id + " with vruntime " + running_task.vruntime);
+        updateMessageDisplay("Inserting " + running_task.id);
         update(curTree);
         running_task = null;
         updateCurTaskDisplay("-");
@@ -100,23 +121,91 @@ function findRunningTask(tasks, timeline, callback) {
     if (!running_task && timeline.size() > 0) {
         var min_node = timeline.min();
         running_task = min_node.val;
+        running_task.this_slice = 0;
         timeline.remove(min_node);
         curTree.remove(curTree.min());
-        console.log("Removing " + running_task.vruntime);
-        updateMessageDisplay("Removing " + running_task.vruntime);
-        updateCurTaskDisplay(running_task.vruntime);
+        console.log("Removing " + running_task.id + " with vruntime " + running_task.vruntime);
+        updateMessageDisplay("Removing " + running_task.id);
+        updateCurTaskDisplay(running_task.id);
         update(curTree);
         if (timeline.size() > 0) {
             min_vruntime = timeline.min().val.vruntime
+            console.log("Updating min_vruntime to " + min_vruntime);
         }
     }
+
+    // Results data for this time unit/tick
+    var tresults = {running_task: null,
+                    completed_task: null};
+
+    // Update the running_task (if any) by increasing the vruntime
+    // and the truntime. If the running task has run for it's full
+    // duration then report it as completed and set running_task
+    // to null.
+    var task_done = false;
+    if (running_task) {
+        running_task.vruntime++;
+        running_task.truntime++;
+        running_task.this_slice++;
+        tresults.running_task = running_task;
+        //console.log(curTime + ": " + running_task.id);
+        if (running_task.truntime >= running_task.duration) {
+            running_task.completed_time = curTime;
+            tresults.completed_task = running_task
+            task_done = true; // Set running_task to null later
+            //console.log("Completed task:", running_task.id);
+            num_of_tasks_until_curTime--;
+            updateSummationWeights(-1*running_task.weight);
+            console.log(running_task.id + " is over")
+            updateCurTaskDisplay("-");
+        }
+    }
+
+    tresults.num_tasks = timeline.size() + (running_task ? 1 : 0);
+
+    results.time_data[curTime] = tresults;
+
+    if (task_done) {
+        running_task = null;
+    }
+
+    curTime++;
 }
 
 function setDelay(value) {
     DELAY = value;
 }
 
+// Run once in initialise
+function updateWeights(tasks) {
+    for (var i=0 ; i<tasks.length ; i++) {
+        tasks[i].weight = Math.pow(1.25, -1*tasks[i].nice) * 1024;
+    }
+}
+
+// Run every time a new task is added
+function updateSummationWeights(value) {
+    total_weight += value;
+}
+
+//
+function updateSlices(tasks, period) {
+    console.log("Updating Slices");
+    for (var i=0 ; i<tasks.length; i++) {
+        if (tasks[i].start_time > curTime) {
+            break;
+        }
+        if (tasks[i].truntime >= tasks[i].duration) {
+            continue;
+        }
+        tasks[i].slice = (tasks[i].weight * period) / total_weight;
+        console.log("period = " + period + " total_weight = " + total_weight);
+        console.log(tasks[i].slice);
+    }
+}
+
 function nextIteration(tasks, timeline, callback) {
+    console.log("CurTime = " + curTime);
     if (curTime < tasks.total_time) {
         // Periodic debug output
         updateCurTimeDisplay(curTime);
@@ -131,41 +220,9 @@ function nextIteration(tasks, timeline, callback) {
             findRunningTask(tasks, timeline, callback);
         }, 3*DELAY/3);
 
-        
-        // Results data for this time unit/tick
-        var tresults = {running_task: null,
-                        completed_task: null};
-
-        // Update the running_task (if any) by increasing the vruntime
-        // and the truntime. If the running task has run for it's full
-        // duration then report it as completed and set running_task
-        // to null.
-        var task_done = false;
-        if (running_task) {
-            running_task.vruntime++;
-            running_task.truntime++;
-            tresults.running_task = running_task;
-            //console.log(curTime + ": " + running_task.id);
-            if (running_task.truntime >= running_task.duration) {
-                running_task.completed_time = curTime;
-                tresults.completed_task = running_task
-                task_done = true; // Set running_task to null later
-                //console.log("Completed task:", running_task.id);
-            }
-        }
-
-        tresults.num_tasks = timeline.size() + (running_task ? 1 : 0);
-
-        results.time_data[curTime] = tresults;
         if (callback) {
             callback(curTime, results);
         }
-
-        if (task_done) {
-            running_task = null;
-        }
-
-        curTime++;
 
         return new Promise(resolve => {
           setTimeout(() => {
