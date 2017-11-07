@@ -48,7 +48,8 @@ function Node(val, opts) {
 
         // Binary tree stored in an array
         arr = opts.arr || null,
-        idx = 0;
+        idx = 0,
+        name = opts.name;
 
     // Common functions/getters/setters. These are wrapped (rather
     // than direct properties) in order to capture statistics about
@@ -84,6 +85,10 @@ function Node(val, opts) {
     this.__defineSetter__('idx', function(arg) {
         STATS.write.idx++;
         idx = arg;
+    });
+
+    this.__defineGetter__('name', function() {
+        return name;
     });
 
 
@@ -413,15 +418,21 @@ function BinaryTree (cmpFn) {
     };
     api.insert = function() {
         // Allow one or more values to be inserted
-        if (arguments.length === 1) {
-            var node = new self.Node(arguments[0], {cmpFn: self.cmpFn});
+        if (arguments[0] === 'n') {
+            var node = new self.Node(arguments[1], {name:arguments[2], cmpFn: self.cmpFn});
             self.root = self.insertFn(self.root, node);
             self.size++;
         } else {
-            for (var i = 0; i < arguments.length; i++) {
-                var node = new self.Node(arguments[i], {cmpFn: self.cmpFn});
+            if (arguments.length === 1) {
+                var node = new self.Node(arguments[0], {cmpFn: self.cmpFn});
                 self.root = self.insertFn(self.root, node);
                 self.size++;
+            } else {
+                for (var i = 0; i < arguments.length; i++) {
+                    var node = new self.Node(arguments[i], {cmpFn: self.cmpFn});
+                    self.root = self.insertFn(self.root, node);
+                    self.size++;
+                }
             }
         }
     };

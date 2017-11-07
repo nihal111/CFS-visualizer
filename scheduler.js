@@ -19,7 +19,7 @@ function roundTo(n, digits) {
     return +(test.toFixed(digits));
 }
 
-var DELAY = 8000;
+var DELAY = 2000;
 var time_queue, time_queue_idx, min_vruntime, running_task, results, start_ms, 
 curTime, total_weight, min_granularity, latency;
 
@@ -85,8 +85,8 @@ function addFromTaskQueue(tasks, timeline, callback) {
         new_task.truntime = 0;
         new_task.actual_start_time = curTime;
         timeline.insert(new_task);
-        curTree.insert(new_task.vruntime);
-        console.log("Adding " + new_task.id + " with vruntime " + new_task.vruntime);
+        curTree.insert('n', new_task.vruntime, new_task.id);
+        updateMessageDisplay("Adding " + new_task.id + " with vruntime " + new_task.vruntime);
         updateMessageDisplay("Adding " + new_task.id);
         update(curTree);
 
@@ -103,8 +103,8 @@ function insertRunningTaskBack(tasks, timeline, callback) {
     // added back to the timeline.
     if (running_task && (running_task.vruntime > min_vruntime) && (running_task.this_slice > running_task.slice)) {
         timeline.insert(running_task);
-        curTree.insert(running_task.vruntime);
-        console.log("Inserting " + running_task.id + " with vruntime " + running_task.vruntime);
+        curTree.insert('n', running_task.vruntime, running_task.id);
+        updateMessageDisplay("Inserting " + running_task.id + " with vruntime " + running_task.vruntime);
         updateMessageDisplay("Inserting " + running_task.id);
         update(curTree);
         running_task = null;
@@ -124,13 +124,13 @@ function findRunningTask(tasks, timeline, callback) {
         running_task.this_slice = 0;
         timeline.remove(min_node);
         curTree.remove(curTree.min());
-        console.log("Removing " + running_task.id + " with vruntime " + running_task.vruntime);
+        updateMessageDisplay("Removing " + running_task.id + " with vruntime " + running_task.vruntime);
         updateMessageDisplay("Removing " + running_task.id);
         updateCurTaskDisplay(running_task.id);
         update(curTree);
         if (timeline.size() > 0) {
             min_vruntime = timeline.min().val.vruntime
-            console.log("Updating min_vruntime to " + min_vruntime);
+            updateMessageDisplay("Updating min_vruntime to " + min_vruntime);
         }
     }
 
@@ -148,15 +148,15 @@ function findRunningTask(tasks, timeline, callback) {
         running_task.truntime++;
         running_task.this_slice++;
         tresults.running_task = running_task;
-        //console.log(curTime + ": " + running_task.id);
+        //updateMessageDisplay(curTime + ": " + running_task.id);
         if (running_task.truntime >= running_task.duration) {
             running_task.completed_time = curTime;
             tresults.completed_task = running_task
             task_done = true; // Set running_task to null later
-            //console.log("Completed task:", running_task.id);
+            //updateMessageDisplay("Completed task:", running_task.id);
             num_of_tasks_until_curTime--;
             updateSummationWeights(-1*running_task.weight);
-            console.log(running_task.id + " is over")
+            updateMessageDisplay(running_task.id + " is over")
             updateCurTaskDisplay("-");
         }
     }
@@ -190,7 +190,7 @@ function updateSummationWeights(value) {
 
 //
 function updateSlices(tasks, period) {
-    console.log("Updating Slices");
+    updateMessageDisplay("Updating Slices");
     for (var i=0 ; i<tasks.length; i++) {
         if (tasks[i].start_time > curTime) {
             break;
@@ -199,8 +199,8 @@ function updateSlices(tasks, period) {
             continue;
         }
         tasks[i].slice = (tasks[i].weight * period) / total_weight;
-        console.log("period = " + period + " total_weight = " + total_weight);
-        console.log(tasks[i].slice);
+        console.log("period = " + period + " total_weight = " + roundTo(total_weight,0));
+        updateMessageDisplay("Task " + tasks[i].id + " has slice = " + roundTo(tasks[i].slice, 0));
     }
 }
 
@@ -249,10 +249,11 @@ function returnResults(tasks, timeline, callback) {
 
 // runScheduler: Run scheduler algorithm
 async function runScheduler(tasks, timeline, callback) {
+    updateMessageDisplay("Scheduler Started");
     initialiseScheduler(tasks);
     initialiseDisplay();
     await nextIteration(tasks, timeline, callback);
-    console.log("finished");
+    updateMessageDisplay("Scheduler Finishes");
     return returnResults(tasks, timeline, callback);    
 }
 
@@ -265,7 +266,9 @@ function updateCurTaskDisplay(curTask) {
 }
 
 function updateMessageDisplay(message) {
-    messageDisplay.innerText = message;
+    console.log(message);
+    messageDisplay.value += message + "\n";
+    messageDisplay.scrollTop = messageDisplay.scrollHeight;
 }
 
 function generateSummary(tasks, timeline, results) {
@@ -534,7 +537,7 @@ function update(sourceTree) {
       .attr("x", function(d) { return d.children ? -10 : 10; })
       .attr("dy", ".35em")
       .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
-      .text(function(d) { if (d.val !== 'NIL') { return d.val; }})
+      .text(function(d) { if (d.val !== 'NIL') { return d.name + ", " + d.val; }})
       .style("fill-opacity", 1e-6);
 
   // Transition nodes to their new position.
