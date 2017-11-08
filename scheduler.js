@@ -537,7 +537,7 @@ function update(sourceTree) {
       .attr("x", function(d) { return d.children ? -10 : 10; })
       .attr("dy", ".35em")
       .attr("text-anchor", function(d) { return d.children ? "end" : "start"; })
-      .text(function(d) { if (d.val !== 'NIL') { return d.name + ", " + d.val; }})
+      .text(function(d) { if (d.val !== 'NIL') { return d.name + ", " + roundTo(d.val, 2); }})
       .style("fill-opacity", 1e-6);
 
   // Transition nodes to their new position.
