@@ -87,7 +87,7 @@ function addFromTaskQueue(tasks, timeline, callback) {
         timeline.insert(new_task);
         curTree.insert('n', new_task.vruntime, new_task.id);
         updateMessageDisplay("Adding " + new_task.id + " with vruntime " + new_task.vruntime);
-        updateMessageDisplay("Adding " + new_task.id);
+        //updateMessageDisplay("Adding " + new_task.id);
         update(curTree);
 
         updateSummationWeights(new_task.weight);
@@ -105,7 +105,7 @@ function insertRunningTaskBack(tasks, timeline, callback) {
         timeline.insert(running_task);
         curTree.insert('n', running_task.vruntime, running_task.id);
         updateMessageDisplay("Inserting " + running_task.id + " with vruntime " + running_task.vruntime);
-        updateMessageDisplay("Inserting " + running_task.id);
+        //updateMessageDisplay("Inserting " + running_task.id);
         update(curTree);
         running_task = null;
         updateCurTaskDisplay("-");
@@ -125,7 +125,7 @@ function findRunningTask(tasks, timeline, callback) {
         timeline.remove(min_node);
         curTree.remove(curTree.min());
         updateMessageDisplay("Removing " + running_task.id + " with vruntime " + running_task.vruntime);
-        updateMessageDisplay("Removing " + running_task.id);
+        //updateMessageDisplay("Removing " + running_task.id);
         updateCurTaskDisplay(running_task.id);
         update(curTree);
         if (timeline.size() > 0) {
@@ -207,6 +207,7 @@ function updateSlices(tasks, period) {
 function nextIteration(tasks, timeline, callback) {
     console.log("CurTime = " + curTime);
     if (curTime < tasks.total_time) {
+        updateMessageDisplay("CPU Time = " + curTime);
         // Periodic debug output
         updateCurTimeDisplay(curTime);
 
