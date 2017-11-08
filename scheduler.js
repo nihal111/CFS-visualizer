@@ -102,7 +102,6 @@ function insertRunningTaskBack(tasks, timeline, callback) {
     // vruntime is greater it won't change min_vruntime when it's
     // added back to the timeline.
     if (running_task && (running_task.vruntime > min_vruntime) && (running_task.this_slice > running_task.slice)) {
-        console.log("here");
         timeline.insert(running_task);
         curTree.insert('n', running_task.vruntime, running_task.id);
         updateMessageDisplay("Inserting " + running_task.id + " with vruntime " + running_task.vruntime);
@@ -145,7 +144,7 @@ function findRunningTask(tasks, timeline, callback) {
     // to null.
     var task_done = false;
     if (running_task) {
-        running_task.vruntime++;
+        running_task.vruntime += roundTo(1024/(1000*running_task.slice), 2);
         running_task.truntime++;
         running_task.this_slice++;
         tresults.running_task = running_task;
@@ -199,7 +198,7 @@ function updateSlices(tasks, period) {
         if (tasks[i].truntime >= tasks[i].duration) {
             continue;
         }
-        tasks[i].slice = (tasks[i].weight * period) / (1000* total_weight); // divide by 1000 to convert to ms
+        tasks[i].slice = roundTo(((tasks[i].weight * period) / (1000* total_weight)), 2); // divide by 1000 to convert to ms
         console.log("period = " + period + " total_weight = " + roundTo(total_weight,0));
         updateMessageDisplay("Task " + tasks[i].id + " has slice = " + roundTo(tasks[i].slice, 2));
     }
