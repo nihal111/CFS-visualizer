@@ -36,3 +36,24 @@ which means that -
 Hitting "Run Scheduler" would start the visualization and the CPU clock can be seen running. The current task is shown at the right, and all the queued tasks are shown in the red-black tree along with their virtual run times. A comprehensive log is generated at run time and can be accessed at the right. (The logging text box can be resized for a better width)
 
 Finally, after the simulation is complete, a detailed report can be found that describes which process was running at which instance.
+
+
+### References
+The Code:
+[https://elixir.free-electrons.com/linux/v4.6/source/include/linux/sched.h](https://elixir.free-electrons.com/linux/v4.6/source/include/linux/sched.h)
+
+Linux Scheduler Documentation:
+[https://www.kernel.org/doc/Documentation/scheduler/sched-design-CFS.txt](https://www.kernel.org/doc/Documentation/scheduler/sched-design-CFS.txt)
+
+Comparisons
+[https://algorithmsandme.in/2014/03/16/scheduling-o1-and-completely-fair-scheduler-cfs/](https://algorithmsandme.in/2014/03/16/scheduling-o1-and-completely-fair-scheduler-cfs/)
+
+Some random research papers:
+[https://www.researchgate.net/figure/220623439_fig4_Figure-8-Process-Fair-Scheduler-prevents-greedy-threaded-program-from-dominating-CPU](https://www.researchgate.net/figure/220623439_fig4_)
+
+LinSched Linux Scheduler Simulator
+[https://www.ibm.com/developerworks/library/l-linux-scheduler-simulator/index.html](https://www.ibm.com/developerworks/library/l-linux-scheduler-simulator/index.html)
+
+On red-black trees
+[https://en.wikipedia.org/wiki/Red%E2%80%93black_tree](https://en.wikipedia.org/wiki/Red%E2%80%93black_tree)
+
